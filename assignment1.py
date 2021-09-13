@@ -63,79 +63,79 @@ n = 5 # number of automatas
 x = 500 # number of loops per run; how many times should the automatas vote and be penalized/rewarded?
 
 
-for state in range(1,states+1): # iterate through states
-    totalHistory = [] # array to hold combined history of each iteration with belonging number of votes
-    totalVotes = 0 # starting value of votes is 0
-    rewardsThisState = [] # holds history of rewards for this state
+state = 65
+totalHistory = [] # array to hold combined history of each iteration with belonging number of votes
+totalVotes = 0 # starting value of votes is 0
+rewardsThisState = [] # holds history of rewards for this state
 
-    for run in range(runs): # iterate through the runs
-        voteHistory = [] # holds how many voted yes each iteration (array)
-        indexHistory = [] # holds the iterations (array)
-        automatas = createMachines(n,state) # create n machines with "state" number of states
-        rewardsThisRun = [] # holds rewards for this run (array)
+for run in range(runs): # iterate through the runs
+    voteHistory = [] # holds how many voted yes each iteration (array)
+    indexHistory = [] # holds the iterations (array)
+    automatas = createMachines(n,state) # create n machines with "state" number of states
+    rewardsThisRun = [] # holds rewards for this run (array)
 
-        for iteration in range(x): # iterate x times, repeating vote-penalty cycle x times
-            yesVotes = 0  # number of yes-votes
-            rewardsThisIteration = 0 # number of rewards
+    for iteration in range(x): # iterate x times, repeating vote-penalty cycle x times
+        yesVotes = 0  # number of yes-votes
+        rewardsThisIteration = 0 # number of rewards
 
-            for currentAutomata in automatas: # go through each automata
-                action = currentAutomata.makeDecision() # current automata gives a vote; yes or no
-                yesVotes += action # counts the vote (1 if yes, 0 if no)
+        for currentAutomata in automatas: # go through each automata
+            action = currentAutomata.makeDecision() # current automata gives a vote; yes or no
+            yesVotes += action # counts the vote (1 if yes, 0 if no)
             # voting run is done, time to count the votes and penalize accordingly
 
-            for currentAutomata in automatas:  # go through each automata
-                penalty = env.penalty(yesVotes)  # boolean; penalized or not.
-                if penalty: # penalized; give penalty
-                    currentAutomata.penalize()
-                else: # not penalized; give reward
-                    currentAutomata.reward()
-                    rewardsThisIteration += 1 # add reward to counter
-            # after conducting the vote, record number of votes, the iteration number, and the number of rewards given this iteration
-            voteHistory.append(yesVotes)
-            indexHistory.append(iteration)
-            rewardsThisRun.append(rewardsThisIteration)
-        # After all iterations are done, record the number of rewards and votes from this run
-        rewardsThisState.append(rewardsThisRun)
-        totalHistory.append([indexHistory,voteHistory])
-        totalVotes+=voteHistory[len(voteHistory)-1]
-    # After all runs, it's time to find the average reward
-    totalRewards = [] # empty array to hold reward values
-    for u in range(x): # initialize it with x zeroes
-        totalRewards.append(0)
+        for currentAutomata in automatas:  # go through each automata
+            penalty = env.penalty(yesVotes)  # boolean; penalized or not.
+            if penalty: # penalized; give penalty
+                currentAutomata.penalize()
+            else: # not penalized; give reward
+                currentAutomata.reward()
+                rewardsThisIteration += 1 # add reward to counter
+        # after conducting the vote, record number of votes, the iteration number, and the number of rewards given this iteration
+        voteHistory.append(yesVotes)
+        indexHistory.append(iteration)
+        rewardsThisRun.append(rewardsThisIteration)
+    # After all iterations are done, record the number of rewards and votes from this run
+    rewardsThisState.append(rewardsThisRun)
+    totalHistory.append([indexHistory,voteHistory])
+    totalVotes+=voteHistory[len(voteHistory)-1]
+# After all runs, it's time to find the average reward
+totalRewards = [] # empty array to hold reward values
+for u in range(x): # initialize it with x zeroes
+    totalRewards.append(0)
 
-    for runIt in range(len(rewardsThisState)): # for each run that was conducted:
-        currentRun = rewardsThisState[runIt]   # find the array of rewards for that run
+for runIt in range(len(rewardsThisState)): # for each run that was conducted:
+    currentRun = rewardsThisState[runIt]   # find the array of rewards for that run
 
-        for iterIt in range(len(currentRun)): # for each reward in a run:
-            currentReward = currentRun[iterIt] # find the reward for a given iteration
-            totalRewards[iterIt] += (currentReward/runs) # add the reward to the total reward for that iteration, divided by total number of runs (sums up to the average)
-            # at the end, totalRewards is an array of the average reward from each individual run.
+    for iterIt in range(len(currentRun)): # for each reward in a run:
+        currentReward = currentRun[iterIt] # find the reward for a given iteration
+        totalRewards[iterIt] += (currentReward/runs) # add the reward to the total reward for that iteration, divided by total number of runs (sums up to the average)
+        # at the end, totalRewards is an array of the average reward from each individual run.
 
-    # Setup plots
-    import matplotlib.pyplot as plt
-    fig, ax = plt.subplots(2)
-    fig.set_size_inches(18.5, 10.5)
-    plt.xlim(0,x)
-    plt.ylim(-1,n+1)
+# Setup plots
+import matplotlib.pyplot as plt
+fig, ax = plt.subplots(2)
+fig.set_size_inches(18.5, 10.5)
+plt.xlim(0,x)
+plt.ylim(-1,n+1)
 
-    # Format vote plot
-    ax[0].set_xlabel("Vote iteration")
-    ax[0].set_ylabel("Yes-votes")
-    ax[0].grid(True)
-    ax[0].set_title("Votes per iteration from "+str(n)+" machines with "+str(state)+" states voting in "+str(x)+" iterations\nCurrently plotting "+str(runs)+" separate runs, with an average final reward of "+str(totalRewards[len(totalRewards)-1]))
+# Format vote plot
+ax[0].set_xlabel("Vote iteration")
+ax[0].set_ylabel("Yes-votes")
+ax[0].grid(True)
+ax[0].set_title("Votes per iteration from "+str(n)+" machines with "+str(state)+" states voting in "+str(x)+" iterations\nCurrently plotting "+str(runs)+" separate runs, with an average final reward of "+str(totalRewards[len(totalRewards)-1]))
 
-    # Format reward plot
-    ax[1].set_xlabel("Vote iteration")
-    ax[1].set_ylabel("Average reward")
-    ax[1].grid(True)
+# Format reward plot
+ax[1].set_xlabel("Vote iteration")
+ax[1].set_ylabel("Average reward")
+ax[1].grid(True)
 
-    # Plot
-    for pt in range (runs):
-        ax[0].plot(totalHistory[pt][0],totalHistory[pt][1])
-        ax[1].plot(totalHistory[pt][0], totalRewards)
+# Plot
+for pt in range (runs):
+    ax[0].plot(totalHistory[pt][0],totalHistory[pt][1])
+    ax[1].plot(totalHistory[pt][0], totalRewards)
 
-    # Show plot, or save to file
+# Show plot, or save to file
 
-    #plt.show()
-    plt.savefig("Assignment 1 plots/"+str(state)+".png")
-    plt.close("all")
+plt.show()
+#plt.savefig("Assignment 1 plots/"+str(state)+".png")
+plt.close("all")
