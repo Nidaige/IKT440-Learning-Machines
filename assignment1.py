@@ -16,6 +16,7 @@
 # evaluate performance on many runs (each run has its own number of loops/iterations)
 
 ### Modified Example code ###
+import math
 import random
 
 
@@ -64,35 +65,59 @@ class Tsetlin:
         else:
             return 1
 
+def createMachines(n,s):
+    a=[]
+    for i in range(n):  # determines number of automatas, adds to automatas array
+        a.append(Tsetlin(s, i))
+    return a
 
 env = Environment(0.2, 0.6)
-runs = 1
-states = 300 # holds number of states for each machine
-automatas = [] # holds each automata
+runs = 100
+states = 10 # holds maximum number of states for each machine, to be iterated through
 n = 5 # number of automatas to vote
-x = 500 # number of loops per run; how many times should the automatas vote and be penalized/rewarded?
+x = 5000 # number of loops per run; how many times should the automatas vote and be penalized/rewarded?
 
-for i in range(n): #determines number of automatas, adds to automatas array
-    automatas.append(Tsetlin(states, i))
 
-for run in range(runs):
-    voteHistory = []
-        # Each run of this loop is a single run (repeat loop for multiple runs)
-    for iteration in range(x): # runs the loop x times
-        yesVotes = 0  # number of yes-votes
-        for currentAutomata in automatas: # go through each automata
-            action = currentAutomata.makeDecision() # current automata gives a vote; yes or no
-            yesVotes += action # counts the vote (1 if yes, 0 if no)
+for state in range(1,states+1):
+    totalHistory = []
+    totalVotes = 0
+    print("State: "+str(state))
+    for run in range(runs):
+        voteHistory = []
+        indexHistory = []
+        automatas = createMachines(n,state)
+            # Each run of this loop is a single run (repeat loop for multiple runs)
+        for iteration in range(x): # runs the loop x times
+            yesVotes = 0  # number of yes-votes
+            for currentAutomata in automatas: # go through each automata
+                action = currentAutomata.makeDecision() # current automata gives a vote; yes or no
+                yesVotes += action # counts the vote (1 if yes, 0 if no)
 
-        # voting run is done, time to count the votes and penalize accordingly
-        for currentAutomata in automatas:  # go through each automata
-            penalty = env.penalty(yesVotes)  # boolean; penalized or not.
-            if penalty:
-                currentAutomata.penalize()
-            else:
-                currentAutomata.reward()
-        #print("Yes-votes: "+ str(yesVotes))
-        voteHistory.append([iteration,yesVotes])
-    print(voteHistory)
+            # voting run is done, time to count the votes and penalize accordingly
+            for currentAutomata in automatas:  # go through each automata
+                penalty = env.penalty(yesVotes)  # boolean; penalized or not.
+                if penalty:
+                    currentAutomata.penalize()
+                else:
+                    currentAutomata.reward()
+            #print("Yes-votes: "+ str(yesVotes))
+            voteHistory.append(yesVotes)
+            indexHistory.append(iteration)
+        #print(voteHistory)
+        totalHistory.append([indexHistory,voteHistory])
+        totalVotes+=voteHistory[len(voteHistory)-1]
+    average=totalVotes/runs
+    import matplotlib.pyplot as plt
+    plt.xlim(0,x)
+    plt.ylim(-1,n+1)
+    plt.xlabel("Vote iteration")
+    plt.ylabel("Yes-votes")
+    plt.title("Votes per iteration from "+str(n)+" machines with "+str(state)+" states voting in "+str(x)+" iterations\nCurrently plotting "+str(runs)+" separate runs, with an average final value of "+str(average))
+    for pt in range (runs):
+        plt.plot(totalHistory[pt][0],totalHistory[pt][1])
+    plt.grid(True)
+    #plt.show()
+    plt.savefig("Assignment 1 plots/"+str(state)+".png")
+
 
 ### End of example code ###
