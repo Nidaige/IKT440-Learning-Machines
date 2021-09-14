@@ -114,7 +114,7 @@ for runIt in range(len(rewardsThisState)): # for each run that was conducted:
 # Setup plots
 import matplotlib.pyplot as plt
 fig, ax = plt.subplots(2)
-fig.set_size_inches(18.5, 10.5)
+fig.set_size_inches(12.5, 8.5)
 plt.xlim(0,x)
 plt.ylim(-1,n+1)
 
