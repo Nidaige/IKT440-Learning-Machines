@@ -30,24 +30,27 @@ class Tsetlin:
         # Initial state selected randomly
         self.state = random.choice([self.n, self.n + 1])
 
+    # machine gets reward, goes deeper into curent state
     def reward(self):
         if self.state <= self.n and self.state > 1:
             self.state -= 1
         elif self.state > self.n and self.state < 2 * self.n:
             self.state += 1
 
+    # machine gets penalized, less certain about current state
     def penalize(self):
         if self.state <= self.n:
             self.state += 1
         elif self.state > self.n:
             self.state -= 1
 
+    # machine gives yes or no vote based on current state
     def makeDecision(self):
         if self.state <= self.n:
             return 0
         else:
             return 1
-
+# creates n machines with s states
 def createMachines(n,s):
     a=[]
     for i in range(n):  # determines number of automatas, adds to automatas array
