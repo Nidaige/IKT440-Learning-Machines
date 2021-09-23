@@ -1,12 +1,5 @@
 import random
-patients = [
-{'Menop.-ge40':True, 'NOT Menop.-ge40':False, 'Menop.-lt40':False,'NOT Menop.-lt40':True,'Menop.-premeno':False, 'NOT Menop.-premeno':True, 'Inv-nodes-0-2':False, 'NOT Inv-nodes-0-2':True, 'Inv-nodes-3-5':True, 'NOT Inv-nodes-3-5':False, 'Inv-nodes-6-8':False, 'NOT Inv-nodes-6-8':True, 'Deg-malg-3':True, 'NOT Deg-malg-3':False,'Deg-malg-2':False, 'NOT Deg-malg-2':True,'Deg-malg-1':False, 'NOT Deg-malg-1':True,},
-{'Menop.-ge40':False, 'NOT Menop.-ge40':True, 'Menop.-lt40':True,'NOT Menop.-lt40':False,'Menop.-premeno':False, 'NOT Menop.-premeno':True, 'Inv-nodes-0-2':True, 'NOT Inv-nodes-0-2':False, 'Inv-nodes-3-5':False, 'NOT Inv-nodes-3-5':True, 'Inv-nodes-6-8':False, 'NOT Inv-nodes-6-8':True, 'Deg-malg-3':True, 'NOT Deg-malg-3':False,'Deg-malg-2':False, 'NOT Deg-malg-2':True,'Deg-malg-1':False, 'NOT Deg-malg-1':True,},
-{'Menop.-ge40':True, 'NOT Menop.-ge40':False, 'Menop.-lt40':False,'NOT Menop.-lt40':True,'Menop.-premeno':False, 'NOT Menop.-premeno':True, 'Inv-nodes-0-2':False, 'NOT Inv-nodes-0-2':True, 'Inv-nodes-3-5':False, 'NOT Inv-nodes-3-5':True, 'Inv-nodes-6-8':True, 'NOT Inv-nodes-6-8':False, 'Deg-malg-3':True, 'NOT Deg-malg-3':False,'Deg-malg-2':False, 'NOT Deg-malg-2':True,'Deg-malg-1':False, 'NOT Deg-malg-1':True,},
-{'Menop.-ge40':True, 'NOT Menop.-ge40':False, 'Menop.-lt40':False,'NOT Menop.-lt40':True,'Menop.-premeno':False, 'NOT Menop.-premeno':True, 'Inv-nodes-0-2':True, 'NOT Inv-nodes-0-2':False, 'Inv-nodes-3-5':False, 'NOT Inv-nodes-3-5':True, 'Inv-nodes-6-8':False, 'NOT Inv-nodes-6-8':True, 'Deg-malg-3':False, 'NOT Deg-malg-3':True,'Deg-malg-2':True, 'NOT Deg-malg-2':False,'Deg-malg-1':False, 'NOT Deg-malg-1':True,},
-{'Menop.-ge40':False, 'NOT Menop.-ge40':True, 'Menop.-lt40':False,'NOT Menop.-lt40':True,'Menop.-premeno':True, 'NOT Menop.-premeno':False, 'Inv-nodes-0-2':True, 'NOT Inv-nodes-0-2':False, 'Inv-nodes-3-5':False, 'NOT Inv-nodes-3-5':True, 'Inv-nodes-6-8':False, 'NOT Inv-nodes-6-8':True, 'Deg-malg-3':True, 'NOT Deg-malg-3':False,'Deg-malg-2':False, 'NOT Deg-malg-2':True,'Deg-malg-1':False, 'NOT Deg-malg-1':True,},
-{'Menop.-ge40':False, 'NOT Menop.-ge40':True, 'Menop.-lt40':False,'NOT Menop.-lt40':True,'Menop.-premeno':True, 'NOT Menop.-premeno':False, 'Inv-nodes-0-2':True, 'NOT Inv-nodes-0-2':False, 'Inv-nodes-3-5':False, 'NOT Inv-nodes-3-5':True, 'Inv-nodes-6-8':False, 'NOT Inv-nodes-6-8':True, 'Deg-malg-3':False, 'NOT Deg-malg-3':True,'Deg-malg-2':False, 'NOT Deg-malg-2':True,'Deg-malg-1':True, 'NOT Deg-malg-1':False,},
-]
+
 
 def evaluate_condition(observation, condition):     # copied from https://github.com/cair/TsetlinMachineBook/blob/main/Chapter_1.ipynb
     truth_value_of_condition = True
@@ -18,14 +11,6 @@ def evaluate_condition(observation, condition):     # copied from https://github
             truth_value_of_condition = False
             break
     return truth_value_of_condition
-
-
-rule1 = [{'Deg-malg-3','NOT Menop.-lt40'}]
-rule2 = [{'Deg-malg-3','NOT Menop.-lt40'}]
-rule3 = [{'Inv-nodes-0-2'}]
-
-for patient in patients:
-    print(evaluate_condition(patient,rule1))
 
 
 class Memory:
@@ -58,3 +43,67 @@ class Memory:
     def memorize_always(self, literal):
         if self.memory[literal] < 10:
             self.memory[literal] += 1
+
+
+# Evaluating rules part ------------------------------------------------------------------
+
+# Positive Features
+Menopge40 = 'Menopge40'
+Menoplt40 = 'Menoplt40'
+Menopremeno = 'Menopremeno'
+Inv02 = 'Inv02'
+Inv35 = 'Inv35'
+Inv68 = 'Inv68'
+DegMalg3 = 'DegMalg3'
+DegMalg2 = 'DegMalg2'
+DegMalg1 = 'DegMalg1'
+
+# Negative Features
+NotMenopge40 = 'NOT Menopge40'
+NotMenoplt40 = 'NOT Menoplt40'
+NotMenopremeno = 'NOT Menopremeno'
+NotInv02 = 'NOT Inv02'
+NotInv35 = 'NOT Inv35'
+NotInv68 = 'NOT Inv68'
+NotDegMalg3 = 'NOT DegMalg3'
+NotDegMalg2 = 'NOT DegMalg2'
+NotDegMalg1 = 'NOT DegMalg1'
+
+# all patients from data set
+patients = [
+{Menopge40:True,  Menoplt40:False,Menopremeno:False, Inv02:False, Inv35:True,  Inv68:False,  DegMalg3:True,  DegMalg2:False, DegMalg1:False},
+{Menopge40:False, Menoplt40:True, Menopremeno:False, Inv02:True,  Inv35:False, Inv68:False,  DegMalg3:True,  DegMalg2:False, DegMalg1:False},
+{Menopge40:True,  Menoplt40:False,Menopremeno:False, Inv02:False, Inv35:False, Inv68:True,   DegMalg3:True,  DegMalg2:False, DegMalg1:False},
+{Menopge40:True,  Menoplt40:False,Menopremeno:False, Inv02:True,  Inv35:False, Inv68:False,  DegMalg3:False, DegMalg2:True,  DegMalg1:False},
+{Menopge40:False, Menoplt40:False,Menopremeno:True,  Inv02:True,  Inv35:False, Inv68:False,  DegMalg3:True,  DegMalg2:False, DegMalg1:False},
+{Menopge40:False, Menoplt40:False,Menopremeno:True,  Inv02:True,  Inv35:False, Inv68:False,  DegMalg3:False, DegMalg2:False, DegMalg1:True},
+]
+
+# array to hold recurrence verdict of each patient
+patientsRecurrence = []
+
+# Rule definitions
+rule1 = [DegMalg3, NotMenoplt40]  # Rule 1: Deg Malg 3 and Not Menop. Lt 40 means recurrence
+rule2 = [DegMalg3, NotMenoplt40]  # Rule 2: Same as Rule 1
+rule3 = [Inv02]  # Rule 3: If Inv. Nodes 0-2, then not recurrence
+
+
+# Iterate through patients and evaluate each rule
+for patient in patients:
+    patientCount = 0  # counts number of indicators for or against recurrence
+
+    if evaluate_condition(patient, rule1):  # outcome of rule 1
+        patientCount += 1
+
+    if evaluate_condition(patient, rule2):  # outcome of rule 2
+        patientCount += 1
+
+    if evaluate_condition(patient, rule3):  # outcome of rule 3
+        patientCount -= 1  # Special case: r3 indicates non-recurrence when true, hence the minus
+
+    patientsRecurrence.append(patientCount)
+for a in range(len(patientsRecurrence)):
+    print("Patient: "+str(a)+", Recurrence votes: "+str(patientsRecurrence[a]))
+
+
+# Type 1 and 2 feedback part --------------------------------------------------------------------------
