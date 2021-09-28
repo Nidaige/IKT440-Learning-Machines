@@ -1,24 +1,42 @@
+### Notes ####
+# Student Name: Henning Blomfeldt Thorsen
+# These comments are to be regarded as a small readme as there is no text area on the canvas submission.
+#
+# I chose to implement an algorithm that chooses a mix of feedback type 1 and 2 to learn both rules for recurrence, and non-recurrence.
+# - By splitting the data set into the two types (recurring and non-recurring), I can have the machine learn rules for both types, instead of having very bulky code.
+# For this reason, there is no real separation between the points 5-8 in the code.
+# I've tried adding comments explaining what the code does almost everywhere
+# I also parameterized the remember and forget values so that they can be changed when you want to run the different combinations, making the code much smaller and cleaner
+# - This is why the code only runs once, even though there are 4 different conditions to run in the literal assignment text.
+# Finally, even if it isn't part of the assignment, I added a loop that finds the average accuracy of 20 runs, usually landing between 70 and 80%.
+#
+# Hope this little "readme" makes it more clear, if not, do leave some feedback and I can try to explain further.
+#
+# Code is copied from https://github.com/cair/TsetlinMachineBook/blob/main/Chapter_1.ipynb
+# Classes and functions have been altered to fit this problem, but many similarities still remain.
+
+###############
 import math
 import random
 
 
-def evaluate_condition(observation, condition):     # copied from https://github.com/cair/TsetlinMachineBook/blob/main/Chapter_1.ipynb
-    truth_value_of_condition = True
-    for feature in observation:
-        if feature in condition and observation[feature] == False:
+def evaluate_condition(observation, condition): # Compares an observation and a rule
+    truth_value_of_condition = True # initial value is true
+    for feature in observation: # for each feature / literal in the observation,
+        if feature in condition and observation[feature] == False: # if the feature is in the rule, but the observation says it's false, return negative
             truth_value_of_condition = False
             break
-        if 'NOT ' + feature in condition and observation[feature] == True:
+        if 'NOT ' + feature in condition and observation[feature] == True: # if the negated feature is in the rule, but the observation says it's true, return negative
             truth_value_of_condition = False
             break
-    return truth_value_of_condition
+    return truth_value_of_condition # if the observation obeys the rule, this is true.
 
 
 
 
 
 # Evaluating rules part ------------------------------------------------------------------
-
+# All features expressed as variables here to allow for distributed changes later if necessary, and to avoid typing the '' for every feature on every patient
 # Positive Features
 Menopge40 = 'Menopge40'
 Menoplt40 = 'Menoplt40'
@@ -160,7 +178,7 @@ Non_Recurring_Patients = [ # list of patients within the non-recurring class
 {Menopge40:False, Menoplt40:False,Menopremeno:True,  Inv02:True,  Inv35:False, Inv68:False,  DegMalg3:False, DegMalg2:False, DegMalg1:True},
 ]
 
-All_Patients = [Recurring_Patients,Non_Recurring_Patients] # list of all patients
+All_Patients = [Recurring_Patients,Non_Recurring_Patients] # list of all patients. For parameterized access to both sets.
 
 Memory_Size = 500 # The total range of how forgotten/remembered a given feature is
 Memory_Init_Val = math.floor(Memory_Size * 0.5) # The initial value of every feature in memory. Half of the memory size
