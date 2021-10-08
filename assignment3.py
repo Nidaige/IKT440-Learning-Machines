@@ -1,147 +1,54 @@
 ### Connect 4 using tsetlin machines
 
-def DataLoader():
-    data = open("Data/connect-4.data")
-    data_set = []
-    eof = False
-    while not eof:
-        line_data = data.readline()
-        if len(line_data) == 0:
-            eof = True
-        else:
-            line_data = line_data.strip()
-            line_data = line_data.split(',')
-            new_line_data = []
-            # each point in data is [X, O, Blank]
-            # for winners: [X wins, O wins, Draw]
-            for e in line_data:
-                if e == 'b':
-                    new_line_data.append([False, False, True])
-                elif e == 'x':
-                    new_line_data.append([True, False, False])
-                elif e == 'o':
-                    new_line_data.append([False, True, False])
-                elif e == "win":
-                    new_line_data.append([True, False, False])
-                elif e == "draw":
-                    new_line_data.append([False, False, True])
-                else:
-                    new_line_data.append([False, True, False])
-            data_set.append(new_line_data)
-    print(data_set[0])
-
-    positions = ["a1", "a2", "a3", "a4", "a5", "a6", "b1", "b2", "b3", "b4", "b5", "b6", "c1", "c2", "c3", "c4", "c5",
-                 "c6", "d1", "d2", "d3", "d4", "d5", "d6", "e1", "e2", "e3", "e4", "e5", "e6", "f1", "f2", "f3", "f4",
-                 "f5", "f6", "g1", "g2", "g3", "g4", "g5", "g6"]
-    full_data_type_i = []  # generate type-i feedback compatible data (only positive statements, no NOT literals)
-    for line in data_set:  # for each line in the data set
-        line_dict = {}  # new dictionary to hold all literals for that line
-        for pos in range(len(positions)):  # for each position on a board
-            line_dict[positions[pos] + "x"] = line[pos][0]  # update with the presence of X
-            line_dict[positions[pos] + "o"] = line[pos][1]  # update with the presence of O
-            line_dict[positions[pos] + "blank"] = line[pos][2]  # update if blank
-        last_index = len(positions) - 1
-        line_dict["Win"] = line[last_index][0]  # update if X wins
-        line_dict["Loss"] = line[last_index][1]  # update if O wins
-        line_dict["Draw"] = line[last_index][2]  # update if Draw
-        full_data_type_i.append(line_dict)
-    # print(full_data_type_i[0])
-
-    full_data_type_ii = []  # generate type-ii feedback compatible data (with NOT-statements)
-    for line in data_set:
-        line_dict = {}
-        for pos in range(len(positions)):
-            line_dict[positions[pos] + "x"] = line[pos][0]
-            line_dict[positions[pos] + "o"] = line[pos][1]
-            line_dict[positions[pos] + "blank"] = line[pos][2]
-            line_dict["NOT " + positions[pos] + "x"] = not line[pos][0]
-            line_dict["NOT " + positions[pos] + "o"] = not line[pos][1]
-            line_dict["NOT " + positions[pos] + "blank"] = not line[pos][2]
-        last_index = len(positions) - 1
-        line_dict["Win"] = line[last_index][0]  # update if X wins
-        line_dict["Loss"] = line[last_index][1]  # update if O wins
-        line_dict["Draw"] = line[last_index][2]  # update if Draw
-        line_dict["NOT Win"] = not line[last_index][0]  # update if X wins
-        line_dict["NOT Loss"] = not line[last_index][1]  # update if O wins
-        line_dict["NOT Draw"] = not line[last_index][2]  # update if Draw
-        full_data_type_ii.append(line_dict)
-    full_data_type_i_classes = [[], [], []]
-    full_data_type_ii_classes = [[], [], []]
-    for a in full_data_type_i:
-        if a["Win"] == True:
-            full_data_type_i_classes[0].append(a)
-        elif a["Loss"] == True:
-            full_data_type_i_classes[1].append(a)
-        else:
-            full_data_type_i_classes[2].append(a)
-    for a in full_data_type_ii:
-        if a["Win"] == True:
-            full_data_type_ii_classes[0].append(a)
-        elif a["Loss"] == True:
-            full_data_type_ii_classes[1].append(a)
-        else:
-            full_data_type_ii_classes[2].append(a)
-
-    return [full_data_type_i_classes, full_data_type_ii_classes]
-
-
+### Function for loading data. Converts each line of b/x/o/win/loss/draw into -1 for blank/draw, 1 for x/win and 0 for o/loss
 def DataLoaderNumeric():
-    data = open("Data/connect-4.txt")
-    data_set = []
-    eof = False
-    while not eof:
-        line_data = data.readline()
-        if len(line_data) == 0:
-            eof = True
+    data = open("Data/connect-4.txt")  # open file
+    data_set = []  # array to hold data
+    eof = False  # bool indicating end of file
+    while not eof:  # iterate until eof
+        line_data = data.readline()  # read line
+        if len(line_data) == 0: # if line is empty
+            eof = True  # indicate eof
         else:
-            line_data = line_data.strip()
-            line_data = line_data.split(',')
-            new_line_data = []
-            # each point in data is [X, O, Blank]
-            # for winners: [X wins, O wins, Draw]
-            for e in line_data:
-                if e == 'b':
-                    new_line_data.append(-1)
-                elif e == 'x':
+            line_data = line_data.strip() # remove newline characters from each line
+            line_data = line_data.split(',') # split on every comma
+            new_line_data = [] # array to hold numeric values
+            for e in line_data: # for each element (letter) in a line:
+                if e == 'b': # if b (blank), set 2
+                    new_line_data.append(2)
+                elif e == 'x': # if x (x) set 1
                     new_line_data.append(1)
-                elif e == 'o':
+                elif e == 'o': # if o (o) set 0
                     new_line_data.append(0)
-                elif e == "win":
+                elif e == "win": # if x wins, set 1
                     new_line_data.append(1)
-                elif e == "draw":
-                    new_line_data.append(-1)
-                else:
+                elif e == "draw": # if draw, set 2
+                    new_line_data.append(2)
+                else: # if X loses (o wins), set 0
                     new_line_data.append(0)
-            data_set.append(new_line_data)
-    data.close()
-    return (data_set)
+            data_set.append(new_line_data) # add numeric version of current line to array of lines
+    data.close() # close file after all lines are read
+    print(len(data_set)) # print number of lines
+    return (data_set) # return the list of lines
 
 
 ### Tsetlin machine to use the data set
+# imports
 from pyTsetlinMachine.tm import MultiClassTsetlinMachine
 import numpy as np
 import random
 
-print("Imports done")
-# DataLoaderNumeric()
-# train_data = np.loadtxt("Data/connect-4.txt")
-data = DataLoaderNumeric()
-print("Data loaded")
-train_data = np.array(data)
-X_train = train_data[:, 0:-1]
-Y_train = train_data[:, -1]
-print("Training data defined")
-test_data_pre = []
-for a in range(50):
+data = DataLoaderNumeric() # load data
+train_data = np.array(data).astype(np.int) # convert data from list to nparray of ints
+X_train = train_data[:, 0:-1] # define what values are data
+Y_train = train_data[:, -1] # define what values are the predictor (win/loss/draw)
+test_data_pre = [] # array to hold testing data before conversion to nparray
+for a in range(50): # extract 50 randomly selected samples from data set
     test_data_pre.append(random.choice(data))
-test_data = np.array(test_data_pre)
-X_test = test_data[:, 0:-1]
-Y_test = test_data[:, -1]
-print("Test data defined")
-tm = MultiClassTsetlinMachine(20, 15, 10.0)  # , boost_true_positive_feedback=0)
-print("Multiclass machine defined")
-tm.fit(X_train, Y_train, epochs=1)
-print("Machine fitted")
-print("Accuracy:" + str(100 * (tm.predict(X_test) == Y_test).mean()) + "%")
-print("Done :)")
-exit(0)
+test_data = np.array(test_data_pre).astype(np.int) # convert selected test data to nparray of ints
+X_test = test_data[:, 0:-1] # define data of test data
+Y_test = test_data[:, -1] # define predictor (win/loss/draw) of test data
+tm = MultiClassTsetlinMachine(500, 88, 27.0)  # initialize tsetlin machine with # of clauses, T and s in order
+tm.fit(X_train, Y_train, epochs=50) # train the tsetlin machine on the training data, running for 50 epochs
+print("Accuracy:" + str(100 * (tm.predict(X_test) == Y_test).mean()) + "%") # print the average result against test result
+exit(0) # exit, optional
