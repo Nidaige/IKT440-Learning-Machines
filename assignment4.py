@@ -16,7 +16,7 @@ def Get_Stop_Words():
 
 
 
-data = datasets.fetch_20newsgroups(data_home=None, subset='train', categories=None, shuffle=True, random_state=42, remove=(), download_if_missing=True, return_X_y=False)
+data = datasets.fetch_20newsgroups(data_home=None, subset='train', categories=None, shuffle=True, random_state=42, remove=('headers', 'footers', 'quotes'), download_if_missing=True, return_X_y=False)
 data_dict = {}
 stop_words = Get_Stop_Words()
 articles = data.data
@@ -26,7 +26,7 @@ for text in articles:
     for word in words:
         clean_word=''.join(e for e in word if word.isalnum()).lower()
         if len(clean_word) != 0:
-            if clean_word not in data_dict.keys():
+            if clean_word not in data_dict.keys() & clean_word not in stop_words:
                 data_dict[clean_word]="1"
             else:
                 val = int(data_dict[clean_word])
