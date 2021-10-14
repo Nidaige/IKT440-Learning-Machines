@@ -16,11 +16,11 @@ def Get_Stop_Words():
 
 
 
-data = datasets.fetch_20newsgroups(data_home=None, subset='train', categories=None, shuffle=True, random_state=42, remove=(), download_if_missing=True, return_X_y=True)
+data = datasets.fetch_20newsgroups(data_home=None, subset='train', categories=None, shuffle=True, random_state=42, remove=(), download_if_missing=True, return_X_y=False)
 data_dict = {}
 stop_words = Get_Stop_Words()
-print(len(data[0]))
-articles = data[0]
+articles = data.data
+print(data.target_names)
 for text in articles:
     words = text.split(" ")
     for word in words:
