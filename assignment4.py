@@ -19,17 +19,18 @@ def Get_Stop_Words():
 data = datasets.fetch_20newsgroups(data_home=None, subset='train', categories=None, shuffle=True, random_state=42, remove=(), download_if_missing=True, return_X_y=True)
 data_dict = {}
 stop_words = Get_Stop_Words()
-for a in range(1):
-    for b in data[a]:
-        c = b.split(" ")
-        for d in c:
-            k=''.join(e for e in d if d.isalnum()).lower()
-            if len(k) != 0:
-                if k not in data_dict.keys():
-                    data_dict[k]="1"
-                else:
-                    val = int(data_dict[k])
-                    val +=1
-                    data_dict[k]=str(val)
-                current_count = data_dict[k]
+print(len(data[0]))
+articles = data[0]
+for text in articles:
+    words = text.split(" ")
+    for word in words:
+        clean_word=''.join(e for e in word if word.isalnum()).lower()
+        if len(clean_word) != 0:
+            if clean_word not in data_dict.keys():
+                data_dict[clean_word]="1"
+            else:
+                val = int(data_dict[clean_word])
+                val +=1
+                data_dict[clean_word]=str(val)
+            current_count = data_dict[clean_word]
 print(data_dict)
