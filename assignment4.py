@@ -1,5 +1,5 @@
 ### Clasify text samples
-import math
+from math import log2 as log
 
 import numpy
 import seaborn as seaborn
@@ -44,8 +44,9 @@ def Get_Frequencies_By_Category_Dict(dataset):
         for word in debate_data:
             if word not in stop_words:
                 if word not in map[debate_label].keys(): # if word is not in dict, initialize entries
-                    map[debate_label][word] = 1
-                    map[debate_label]["Total"] += 1
+                    for category in dataset["target_names"]:
+                        map[category][word] = 1
+                        map[category]["Total"] += 1
                     map["All_Words"][word] = 1
                     map["All_Words"]["Total"] += 1
                 else: # word is already in dict, increment entries instead
@@ -53,40 +54,35 @@ def Get_Frequencies_By_Category_Dict(dataset):
                     map[debate_label]["Total"] += 1
                     map["All_Words"][word] += 1
                     map["All_Words"]["Total"] += 1
+
     # convert flat occurrence to relative occurrence
     for label in map.keys(): # for all categories
         total = map[label]["Total"] # get the total number of words of that category
         for word in map[label].keys(): # for each word in a category
-            if word not in ["Debates", "Total"]: # if word is not "Debates" or "Total"
-                map[label][word] = map[label][word] / total # divide the occurrence by the total number for that category
-                map["All_Words"][word] = map["All_Words"][word] / map["All_Words"]["Total"] #divide the occurrence of each word in the whole dataset by the total number of words in the dataset
+            map[label][word] = map[label][word] / total # divide the occurrence by the total number for that category
     #   ------------ return populated map
     return map # map = p(o1, o2, o3, ... | h1, h2, h3, h4, ...)
 
 def Predict_Category_From_Text(text, training_data):
     prediction = {}  # dict to hold prediction values
-    nTD = training_data["All_Words"]["Debates"]  # number of total debates
-    for category in training_data.keys(): #for all categories in the training data set
-        if category!="All_Words": #if the category is not "All_Words"
-            prediction[category] = 1.0  # set a starting prediction of 0 because 10^0 = 1
-    # Naive Baies assumption NB: P(o1, o2, o3, … | hj) = prod( P(oi|hj)
-    # P(h|o) = P(o|h)*P(h)
-    # p(category|text) = NB *p(category)
-    for word in Normallize(text): #for each word in text:
-        if len(word)>1:
-            for category in training_data.keys(): # for every hypothesis/category:
-                if category!="All_Words": # if the category is not "All_Words":
-                    if word in training_data[category].keys(): # if word occurrs for this category
-                        prediction[category] *= training_data[category][word] # update the product with the probability of observation "word" given hypothesis "category", or p(word1, word2, word3, ...|category)
-    sum = 0
-    for a in prediction.keys(): # for each category
-        nCD = training_data[a]["Debates"] # number of category debates
-        ph = nCD/nTD
-        poh = prediction[a] # p(o|h)
-        sum+=poh
-        prediction[a] = (poh*ph)#/po # prediction = p(h|o)*p(h)/p(o)
-    print(sum)
-    exit()
+    NormallizedText = Normallize(text)
+    p_o = 0.0
+    for category in training_data.keys(): # initialize prediction dict with all categories:
+        if category!="All_Words":
+            prediction[category] = 0  # log inv(0) = 1
+    for word in NormallizedText:  # for each word
+        if word in training_data["All_Words"].keys(): # makes sure the word is in the dataset before trying to evaluate prob
+            p_o += log(training_data["All_Words"][word])  # product of all p(word), assumes order is irrelevant
+            for category in training_data.keys(): # for each category
+                if category!="All_Words":
+                    prediction[category] += log(training_data[category][word])
+    # now to calculate p(h|o) = p(o|h) * P(h) / p(o)
+    for h in training_data.keys(): # for every category h:
+        if h!="All_Words":
+            p_o_h = prediction[h]
+            p_h = (training_data[h]["Debates"]) / (training_data["All_Words"]["Debates"])
+            p_h_o = p_o_h+p_h-p_o  # inverse log after using them to divide/multiply
+            prediction[h] = p_h_o
     return prediction
 # Main
 print("Get training data")
@@ -100,7 +96,7 @@ all_predictions = []  # all predictions
 all_truths = []  # all truths
 i = 0  # counter for # of predictions
 #for debate_n in range(len(test_data["data"])):
-for debate_n in range(500):
+for debate_n in range(len(test_data["data"])):
     debate = test_data["data"][debate_n]
     truth = test_data["target_names"][test_data["target"][debate_n]]
     all_predictions.append(Predict_Category_From_Text(debate, train_data))
