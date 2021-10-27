@@ -8,6 +8,9 @@
 #  Clasify text samples
 from math import log2 as log
 from sklearn import *
+import nltk
+nltk.download('wordnet')
+from nltk.stem import WordNetLemmatizer
 
 
 def remove_punctuation(s):  # removes punctuation
@@ -28,7 +31,8 @@ def get_stop_words():  # gets words to exclude from file
 
 
 def normalize(s):  # Takes string, returns array of words
-    return remove_punctuation(s.lower()).split(" ")
+    wnl = WordNetLemmatizer()
+    return wnl.lemmatize(remove_punctuation(s.lower())).split(" ")
 
 
 def get_frequencies_by_category_dict(dataset):  # Gets dictionary with categories, each with frequency per word
@@ -57,7 +61,7 @@ def get_frequencies_by_category_dict(dataset):  # Gets dictionary with categorie
                     data_map["All_Words"][word] += 1
                     data_map["All_Words"]["Total"] += 1
 
-    # convert flat occurrence to relative occurrence
+    # convert flat occurrence to relative occurrenceas
     for label in data_map.keys():  # for all categories
         total = data_map[label]["Total"]  # get the total number of words of that category
         for word in data_map[label].keys():  # for each word in a category
