@@ -79,7 +79,7 @@ def weighted_random(old_value):
 # step 0: build node network
 Rain = sourceNode(155/366, [], "Rain")
 Sprinkler = sourceNode(0.0823, [], "Sprinkler")  # applying base rate to days without rain: 1/7*211/366 = 0.0823
-Holmes = effectNode([Rain,Sprinkler],[[0,0.8],[0.99,1.0]], "Holmes")
+Holmes = effectNode([Rain,Sprinkler],[[0, 0.8],[0.99, 1.0]], "Holmes")
 Rain.add_child(Holmes)
 Watson = effectNode([Rain], [[0],[1]], "Watson")
 Rain.add_child(Watson)
@@ -99,3 +99,9 @@ Rain.set_probability(random())
 Sprinkler.set_probability(random())
 print("Prior: ",Rain.Name,Rain.Probability,Sprinkler.Name,Sprinkler.Probability)
 # step 4: update probability of nodes based on their markov blanket
+# calculate p(rain|wet grass)
+# p(rain|wet grass) = P(wet grass|rain) * p(rain)/p(wet grass)
+# p(wet grass|rain) = sum of conditional probabilities of wet grass when rain
+# p(rain) = estimated
+# p(wet grass) = sum of all conditional probabilities times the probability of their condition
+#       p(holmes grass wet) = P(holmes grass wet|rain)* p(rain) + p(hoolmes grass wet|sprinkler)* p(sprinkler)
