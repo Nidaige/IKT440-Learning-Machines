@@ -2,6 +2,9 @@
 Assignment text (pasted from canvas)
 Assignment–Bayesian Networks
 •Implement data structure for Wet Grass Bayesian Network (slide 7), including graph and probability tables
+    - Graph can be done with nodes
+    - Probability tables can be multi-dimensional arrays/lists:
+        if the order is P1, P2, P3, then P(x|p1, p2, p3) = p[p1][p2][p3]
 •Assign appropriate probabilities to the probability tables
 •Implement Stochastic Simulation inference scheme
 •Estimate P(Rain | Holmes’ Grass is Wet, Watson’s  Grass is Wet) and 3 other queries you select.
@@ -64,50 +67,86 @@ class sourceNode:  # class for rain and sprinkler
     def roll(self):  # returns True with p = Probability
         return random() <= self.Probability
 
+    def get_markov_blanket(self):
+        children = self.Children
+        parents = []
+        for child in children:
+            ch_parents = (child.Parents)
+            for parent in ch_parents:
+                if parent.Name!=self.Name:
+                    parents.append(parent)
+        return children + parents
+
+    def update_probability_weighted(self,adjustment):
+        self.Probability+=adjustment
+
 class effectNode: # class for lawns/grass
     def __init__(self, Pa, Pr, Na):
         self.Parents = Pa
         self.Probabilities = Pr
         self.Name = Na
+        self.ParentIds = [0,1]
 
-    def Evaluate(self):
+    def evaluate(self):
         prob = 0
-        for parent in self.Parents:
-            prob += (self.Probabilities[parent.Name]*parent.Probability)
-        return prob
+        parent_probs = []
+        for a in self.Parents:
+            parent_probs.append(a.Probability)
+        # for a given node, multiply its conditional probabilities with the probability of the parent it depends on
+        rain_prob = [1-parent_probs[0],parent_probs[0]]
+        sprinkler_prob = [1.0,1.0]
+        if len(self.Parents)!=1:
+            sprinkler_prob = [1-parent_probs[1], parent_probs[1]]
+        for a in range(len(self.Probabilities)):  # For each state of rain:
+            r = self.Probabilities[a] # current subset of probs given current state of rain
+            for b in range(len(r)):  # For each state of sprinkler:
+                prob += r[b]*rain_prob[a]*sprinkler_prob[b]
+        return min(prob,1)
 
-    def Roll(self):
-        return random()<=self.Evaluate()
+
+    def roll(self):
+        return random()<=self.evaluate()
+
+    def get_markov_blanket(self):
+        return self.Parents
+
+    def update_probability(self,rain,sprinkler,val):
+        self.Probabilities[rain][sprinkler] = val
+
+    def update_probability_weighted(self,rain,sprinkler,val, adjustment):
+        self.Probabilities[rain][sprinkler] = val+adjustment
 
 
-# Probabilities for rain and sprinkler
-p_Rain = 2/21  # Two days every three weeks
-p_Sprinkler = 1/7  # Three times per week for four months a year
+def weighted_random(old_value):
+    roll = random()
+    adjustment = 0.05
+    if roll>old_value:
+        roll-=adjustment
+    elif roll<old_value:
+        roll+=adjustment
+    return roll
 
-# init source nodes (Rain and Sprinkler)
-Rain = sourceNode(2/21, [], "Rain")
-Sprinkler = sourceNode(1/7, [], "Sprinkler")
 
-# Conditional probabilities for watson
-p_Watson_rain = 1.0  # p(watson|rain)
-p_Watson_not_rain = 0.0  # p(watson|not rain)
-p_Watson_sprinkler = 0.8  # p(watson|sprinkler)
-p_Watson_not_Sprinkler = 0.0  # p(watson| not sprinkler
-
-# init watson node with rain and sprinkler nodes as parents. Add Watson as child for rain and sprinkler nodes
-Watson = effectNode([Rain,Sprinkler],{"Rain":p_Watson_rain, "NOT Rain":p_Watson_not_rain, "Sprinkler":p_Watson_sprinkler, "NOT Sprinkler": p_Watson_not_Sprinkler}, "Watson")
-Rain.add_child(Watson)
-Sprinkler.add_child(Watson)
-
-# conditional probabilities for holmes
-p_Holmes_Rain = 1.0  # p(holmes|rain)
-p_Holmes_not_Rain = 0.0  # p(holmes|not rain)
-
-# init holmes node with rain as parent. Add holmes as child for rain node
-Holmes = effectNode([Rain], {"Rain":p_Holmes_Rain, "NOT Rain": p_Holmes_not_Rain}, "Holmes")
+# step 0: build node network
+Rain = sourceNode(155/366, [], "Rain")
+Sprinkler = sourceNode(0.0823, [], "Sprinkler")  # applying base rate to days without rain: 1/7*211/366 = 0.0823
+Holmes = effectNode([Rain,Sprinkler],[[0,0.8],[0.99,1.0]], "Holmes")
 Rain.add_child(Holmes)
-
-# Evaluating probability of activation given parents
-print(Watson.Name,Watson.Evaluate())
-print(Holmes.Name,Holmes.Evaluate())
-
+Watson = effectNode([Rain], [[0],[1]], "Watson")
+Rain.add_child(Watson)
+Sprinkler.add_child(Holmes)
+# step 1: set conditional probabilities
+# done in initialization of nodes
+# step 2: set value of observed nodes
+''' what nodes are observed?
+    - conditional probabilities for watson and holmes 
+'''
+# step 3: randomize non-observed nodes
+''' what nodes are not observed?
+    - Rain
+    - Sprinkler
+'''
+Rain.set_probability(random())
+Sprinkler.set_probability(random())
+print("Prior: ",Rain.Name,Rain.Probability,Sprinkler.Name,Sprinkler.Probability)
+# step 4: update probability of nodes based on their markov blanket
